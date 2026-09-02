@@ -1,0 +1,35 @@
+{
+  "log": { "level": "warn", "timestamp": true },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "address": ["172.19.0.1/30"],
+      "mtu": 1500,
+      "auto_route": true,
+      "strict_route": false,
+      "stack": "gvisor"
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "socks",
+      "tag": "to-proxy",
+      "server": "127.0.0.1",
+      "server_port": 10808,
+      "version": "5",
+      "udp_over_tcp": false
+    },
+    { "type": "direct", "tag": "direct-out" }
+  ],
+  "route": {
+    "auto_detect_interface": true,
+    "final": "direct-out",
+    "rules": [
+      { "action": "sniff" },
+      { "process_name": ["xray.exe", "v2rayN.exe", "sing-box.exe"], "outbound": "direct-out" },
+      { "ip_is_private": true, "outbound": "direct-out" },
+      { "ip_cidr": ["54.115.192.0/19"], "outbound": "to-proxy" }
+    ]
+  }
+}
